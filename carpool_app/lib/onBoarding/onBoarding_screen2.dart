@@ -1,8 +1,9 @@
-import 'package:carpool_app/login/welcome_screen.dart';
 import 'package:carpool_app/onBoarding/onBoarding_screen3.dart';
+import 'package:carpool_app/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../login/view/welcome_screen.dart';
 import '../style/AppColors.dart';
 
 class OnBoardingScreen2 extends StatelessWidget {

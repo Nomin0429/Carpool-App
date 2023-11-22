@@ -35,6 +35,10 @@ class AppColors {
   static const Color error200 = Color.fromRGBO(239, 154, 154, 1);
   static const Color error100 = Color.fromRGBO(255, 205, 210, 1);
   static const Color error50 = Color.fromRGBO(255, 235, 238, 1);
+
+  ///text colors
+  static const Color textBlack = Color.fromRGBO(0, 0, 0, 1);
+  static const Color textInfo = Color.fromRGBO(184, 184, 184, 1);
   //Success
   //Secondary
   //Neutral

@@ -1,8 +1,8 @@
-import 'package:carpool_app/login/welcome_screen.dart';
 import 'package:carpool_app/onBoarding/onBoarding_screen2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../login/view/welcome_screen.dart';
 import '../style/AppColors.dart';
 
 class OnBoardingScreen extends StatelessWidget {
@@ -20,7 +20,7 @@ class OnBoardingScreen extends StatelessWidget {
               Get.to(const WelcomeScreen());
             },
             child: const Text(
-              'Skip',
+              'Алгасах',
               style: TextStyle(
                 color: Colors.black,
               ),
@@ -74,9 +74,9 @@ class OnBoardingScreen extends StatelessWidget {
                 },
                 style: ElevatedButton.styleFrom(
                   primary: AppColors.primary500,
-                  onPrimary: Colors.white, // Text color
-                  shape: const CircleBorder(), // Make the button a circle
-                  padding: const EdgeInsets.all(24), // Button size
+                  onPrimary: Colors.white,
+                  shape: const CircleBorder(),
+                  padding: const EdgeInsets.all(24),
                 ),
                 child: const Icon(Icons.arrow_forward),
               ),
