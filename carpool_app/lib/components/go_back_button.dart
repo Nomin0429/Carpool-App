@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
 ///Буцах товчны widget
 class GoBackButton extends StatelessWidget {
@@ -17,10 +18,7 @@ class GoBackButton extends StatelessWidget {
             children: [
               Padding(
                 padding: EdgeInsets.all(10.0),
-                child: Image(
-                  height: 14,
-                  image: AssetImage('assets/icons/angleLeft.png'),
-                ),
+                child: Icon(LineAwesomeIcons.angle_left),
               ),
               Text(
                 'Буцах',

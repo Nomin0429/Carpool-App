@@ -1,7 +1,8 @@
+import 'package:carpool_app/login/view/login_screen.dart';
 import 'package:carpool_app/login/view/welcome_screen.dart';
-import 'package:carpool_app/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../style/AppColors.dart';
 
 class OnBoardingScreen3 extends StatelessWidget {
@@ -15,11 +16,12 @@ class OnBoardingScreen3 extends StatelessWidget {
         backgroundColor: Colors.white,
         actions: <Widget>[
           TextButton(
-            onPressed: () {
-              Get.to(const WelcomeScreen());
+            onPressed: () async {
+              await setOnboardingSeen();
+              Get.to(LoginScreen());
             },
             child: const Text(
-              'Skip',
+              'Алгасах',
               style: TextStyle(
                 color: Colors.black,
               ),
@@ -39,7 +41,7 @@ class OnBoardingScreen3 extends StatelessWidget {
               height: 60,
             ),
             const Text(
-              'Book your car',
+              'Хамтдаа зорчих',
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 26),
             ),
             const SizedBox(
@@ -48,7 +50,7 @@ class OnBoardingScreen3 extends StatelessWidget {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 30),
               child: Text(
-                'Sell houses easily with the help of Listenoryx and to make this line big I am writing more.',
+                'Дайгдах унаагаа эсвэл дайх хүмүүсээ олоорой.',
                 style: TextStyle(fontSize: 14, color: Colors.grey),
               ),
             ),
@@ -68,16 +70,17 @@ class OnBoardingScreen3 extends StatelessWidget {
                 ],
               ),
               child: ElevatedButton(
-                onPressed: () {
-                  Get.to(const WelcomeScreen());
+                onPressed: () async {
+                  await setOnboardingSeen();
+                  Get.to(LoginScreen());
                 },
                 style: ElevatedButton.styleFrom(
                   primary: AppColors.primary500,
-                  onPrimary: Colors.white, // Text color
-                  shape: const CircleBorder(), // Make the button a circle
-                  padding: const EdgeInsets.all(24), // Button size
+                  onPrimary: Colors.white,
+                  shape: const CircleBorder(),
+                  padding: const EdgeInsets.all(24),
                 ),
-                child: const Text('Go'),
+                child: const Text('Эхлэх'),
               ),
             )
           ],
@@ -85,4 +88,9 @@ class OnBoardingScreen3 extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<void> setOnboardingSeen() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('seen_onboarding', true);
 }

@@ -1,14 +1,28 @@
 import 'package:carpool_app/login/state/login_state.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:location/location.dart';
 
 class LoginController extends GetxController {
   final LoginState state = LoginState();
+  final _auth = FirebaseAuth.instance;
+
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
 
   @override
   void onInit() {
-    // TODO: implement onInit
     super.onInit();
+  }
+
+  Future<bool> signInEmailAndPassword() async {
+    try {
+      await _auth.signInWithEmailAndPassword(email: emailController.text.trim(), password: passwordController.text.trim());
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   void toggleObsecureText() {
@@ -18,18 +32,18 @@ class LoginController extends GetxController {
   Future<dynamic> getLocation() async {
     Location location = Location();
 
-    bool _serviceEnabled;
-    PermissionStatus _permissionGranted;
-    LocationData _locationData;
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
+    LocationData locationData;
 
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) _serviceEnabled = await location.requestService();
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) serviceEnabled = await location.requestService();
 
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
+    permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
     }
-    _locationData = await location.getLocation();
-    return _locationData;
+    locationData = await location.getLocation();
+    return locationData;
   }
 }
