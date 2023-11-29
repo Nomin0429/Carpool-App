@@ -1,3 +1,4 @@
+import 'package:carpool_app/style/AppColors.dart';
 import 'package:flutter/material.dart';
 
 class SuccessDialogWidget extends StatelessWidget {
@@ -16,7 +17,7 @@ class SuccessDialogWidget extends StatelessWidget {
       _showSuccessDialog(context);
     });
 
-    return Container(); // This container is just a placeholder.
+    return Container();
   }
 
   void _showSuccessDialog(BuildContext context) {
@@ -24,12 +25,16 @@ class SuccessDialogWidget extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: const BorderSide(color: AppColors.primary300)),
           child: Container(
             padding: const EdgeInsets.all(20.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text(title),
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
                 const SizedBox(height: 20),
                 const CircularProgressIndicator(),
               ],

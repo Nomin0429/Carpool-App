@@ -1,9 +1,9 @@
+import 'package:carpool_app/login/view/login_screen.dart';
 import 'package:carpool_app/onBoarding/onBoarding_screen2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../login/view/welcome_screen.dart';
 import '../style/AppColors.dart';
+import 'onBoarding_screen3.dart';
 
 class OnBoardingScreen extends StatelessWidget {
   const OnBoardingScreen({super.key});
@@ -16,8 +16,9 @@ class OnBoardingScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         actions: <Widget>[
           TextButton(
-            onPressed: () {
-              Get.to(const WelcomeScreen());
+            onPressed: () async {
+              await setOnboardingSeen();
+              Get.to(LoginScreen());
             },
             child: const Text(
               'Алгасах',
@@ -40,7 +41,7 @@ class OnBoardingScreen extends StatelessWidget {
               height: 60,
             ),
             const Text(
-              'Anywhere you are',
+              'Унаа захиалах',
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 26),
             ),
             const SizedBox(
@@ -49,7 +50,7 @@ class OnBoardingScreen extends StatelessWidget {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 30),
               child: Text(
-                'Sell houses easily with the help of Listenoryx and to make this line big.',
+                'Хаа нэг тийшээ явах гэж байна уу? Бид таныг хүссэн газартаа хямдаар нэг зүгийнхэнтэйгээ хамт явах боломжийг олгоно.',
                 style: TextStyle(fontSize: 14, color: Colors.grey),
               ),
             ),

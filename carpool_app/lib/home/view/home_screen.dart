@@ -1,13 +1,16 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carpool_app/components/alert_dialog.dart';
 import 'package:carpool_app/home/component/home_app_bar.dart';
 import 'package:carpool_app/home/component/option_card.dart';
 import 'package:carpool_app/home/logic/home_controller.dart';
 import 'package:carpool_app/home/view/home_screen_driver.dart';
 import 'package:carpool_app/home/view/home_screen_rider.dart';
+import 'package:carpool_app/home/view/profile/view/car_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class HomeScreen extends StatelessWidget {
-  HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +29,11 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(
                   height: 35,
                 ),
-                Text(
-                  '$greeting, \nНомин.',
-                  style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w700),
+                Obx(
+                  () => Text(
+                    '$greeting, \n ${homeController.homeState.userData['name']}',
+                    style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w700),
+                  ),
                 ),
                 const SizedBox(height: 35),
                 OptionCard(
@@ -37,30 +42,43 @@ class HomeScreen extends StatelessWidget {
                     isDriver: true,
                     cardHeight: 180.0,
                     onTap: () {
-                      Get.to(HomeScreenDriver());
+                      homeController.homeState.userData['cars'].isEmpty
+                          ? Get.dialog(ShowAlertDialog(
+                              onTap: () {
+                                Get.to(CarProfile());
+                              },
+                              title: 'Машин нэмэх',
+                              onTapText: 'Машин нэмэх',
+                              subtitle: 'Та аялал үүсгэхийн тулд машинтай байх ёстой. Та машингүй байгаа тул машин нэмэх үү?'))
+                          : Get.to(HomeScreenDriver());
                     }),
                 const SizedBox(
                   height: 10,
                 ),
                 OptionCard(
                   title: 'Дайгдах гэж байна уу?',
-                  description: 'Хэдүүлээ, хаанаас хаашаа явахаа, хэзээ явахаа оруулан дайгдах унаануудаа олон сонгоод яваарай.',
+                  description: 'Нэг зүгт явах унаагаа олоод тухтай зорчоорой.',
                   isDriver: false,
                   cardHeight: 180.0,
                   onTap: () {
+                    homeController.listenToRides();
                     Get.to(HomeScreenRider());
                   },
                 ),
                 const SizedBox(
-                  height: 30,
+                  height: 40,
                 ),
-                // !_homeController.homeState.isLoadingWeather.value
-                //     ? Row(children: [
-                //         //Image.network(_homeController.homeState.weatherIcon.value),
-                //         //Image.network('${_homeController.homeState.weatherData['iconUrl'].value}'),
-                //         //Text('${_homeController.homeState.weatherData['temp_c']}')
-                //       ])
-                //     : Container(),
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  CachedNetworkImage(
+                    imageUrl: homeController.homeState.weatherIcon.value,
+                    placeholder: (context, url) => const CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => const Icon(Icons.error),
+                  ),
+                  Text(
+                    '${homeController.homeState.weatherTemp.value}',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                ])
               ],
             ),
           ),

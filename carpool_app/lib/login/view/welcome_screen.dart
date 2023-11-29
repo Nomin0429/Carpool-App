@@ -19,14 +19,14 @@ class WelcomeScreen extends StatelessWidget {
               height: 20,
             ),
             const Text(
-              'Welcome',
+              'Тавтай морил',
               style: TextStyle(fontSize: 26, fontWeight: FontWeight.w500),
             ),
             const SizedBox(
               height: 10,
             ),
             const Text(
-              'Have a better sharing experience.',
+              '',
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
             const SizedBox(
@@ -46,7 +46,7 @@ class WelcomeScreen extends StatelessWidget {
                       elevation: MaterialStateProperty.all(0.0),
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)))),
                   child: const Text(
-                    'Create an account',
+                    'Бүртгүүлэх',
                     style: TextStyle(color: Colors.white),
                   ),
                 )),
@@ -64,7 +64,7 @@ class WelcomeScreen extends StatelessWidget {
                         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0), side: const BorderSide(color: AppColors.primary700)))),
                     child: const Text(
-                      'Log In',
+                      'Нэвтрэх',
                       style: TextStyle(color: AppColors.primary700),
                     ))),
           ],

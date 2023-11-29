@@ -1,10 +1,13 @@
+import 'dart:developer';
+
 import 'package:carpool_app/components/go_back_button.dart';
-import 'package:carpool_app/components/success_dialog_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
 import '../../style/AppColors.dart';
-import '../component/form_field_item.dart';
+import '../../components/form_field_item.dart';
+import '../component/auto_close_dialog.dart';
 import '../logic/signup_controller.dart';
 
 ///todo: Registration amjilttai bolson dialog haruulah
@@ -13,8 +16,8 @@ class SignUpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SignUpController _signUpController = Get.put(SignUpController());
-    final _formKey = GlobalKey<FormState>();
+    final SignUpController signUpController = Get.put(SignUpController());
+    final formKey = GlobalKey<FormState>();
 
     return Scaffold(
       body: Padding(
@@ -29,13 +32,13 @@ class SignUpScreen extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
-                  'Имейл эсвэл утасны дугаараа оруулан бүртгүүлээрэй',
+                  'Доорх хэсгүүдийг бөглөн бүртгүүлээрэй',
                   style: TextStyle(fontSize: 27),
                 ),
               ),
               const SizedBox(height: 20),
               Form(
-                key: _formKey,
+                key: formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -43,25 +46,29 @@ class SignUpScreen extends StatelessWidget {
                       hintText: 'Нэр',
                       height: 70,
                       width: 360,
-                      controller: _signUpController.name,
+                      controller: signUpController.name,
+                      icon: const Icon(LineAwesomeIcons.user),
                     ),
                     FormFieldItem(
                       hintText: 'Имейл',
                       height: 70,
                       width: 360,
-                      controller: _signUpController.email,
+                      controller: signUpController.email,
+                      icon: const Icon(LineAwesomeIcons.envelope),
                     ),
                     FormFieldItem(
                       hintText: 'Утасны дугаар',
                       height: 70,
                       width: 360,
-                      controller: _signUpController.phoneNo,
+                      controller: signUpController.phoneNo,
+                      icon: const Icon(LineAwesomeIcons.phone),
                     ),
                     FormFieldItem(
                       hintText: 'Нууц үг',
                       height: 70,
                       width: 360,
-                      controller: _signUpController.password,
+                      controller: signUpController.password,
+                      icon: const Icon(LineAwesomeIcons.fingerprint),
                     ),
                   ],
                 ),
@@ -97,19 +104,25 @@ class SignUpScreen extends StatelessWidget {
                   height: 54,
                   child: ElevatedButton(
                     onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        bool success = await SignUpController.instance.registerUser(
-                          _signUpController.email.text.trim(),
-                          _signUpController.password.text.trim(),
-                        );
-                        if (success) {
-                          const SuccessDialogWidget(
-                            title: 'Таны бүртгэл амжилттай үүслээ.',
+                      if (signUpController.isValidEmail(signUpController.email.text.trim())) {
+                        if (formKey.currentState!.validate()) {
+                          bool success = await SignUpController.instance.registerEmailAndPassword(
+                            signUpController.email.text.trim(),
+                            signUpController.password.text.trim(),
+                            signUpController.name.text.trim(),
+                            signUpController.phoneNo.text.trim(),
                           );
-                        } else {
-                          const SuccessDialogWidget(
-                            title: 'Амжилтгүй',
-                          );
+
+                          if (success) {
+                            Get.dialog(const AutoCloseDialog(
+                              title: 'Таны бүртгэл амжилттай үүслээ.',
+                            ));
+                          } else {
+                            log('email: ${signUpController.email.text.trim()}');
+                            Get.dialog(const AutoCloseDialog(
+                              title: 'Амжилтгүй, та дахин оролдоно уу.',
+                            ));
+                          }
                         }
                       }
                     },
@@ -125,7 +138,7 @@ class SignUpScreen extends StatelessWidget {
                   Expanded(child: Divider()),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 10.0),
-                    child: Text('or', style: TextStyle(fontSize: 15, color: Colors.black12)),
+                    child: Text('эсвэл', style: TextStyle(fontSize: 15, color: Colors.black12)),
                   ),
                   Expanded(child: Divider()),
                 ],
@@ -142,7 +155,7 @@ class SignUpScreen extends StatelessWidget {
                         height: 20,
                       ),
                       label: const Text(
-                        'Sign up with Gmail',
+                        'Gmail-ээр бүртгүүлэх',
                         style: TextStyle(color: Colors.black),
                       ),
                       style: ElevatedButton.styleFrom(
@@ -165,7 +178,7 @@ class SignUpScreen extends StatelessWidget {
                         height: 20,
                       ),
                       label: const Text(
-                        'Sign up with Facebook',
+                        'Facebook-ээр бүртгүүлэх',
                         style: TextStyle(color: Colors.black),
                       ),
                       style: ElevatedButton.styleFrom(
@@ -176,30 +189,30 @@ class SignUpScreen extends StatelessWidget {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)))),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: SizedBox(
-                  width: 350,
-                  height: 45,
-                  child: ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: Image.asset(
-                      'assets/icons/Apple.png',
-                      height: 20,
-                    ),
-                    label: const Text(
-                      'Sign up with Apple',
-                      style: TextStyle(color: Colors.black),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.black12, width: 1.0),
-                        elevation: 0.0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0))),
-                  ),
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(vertical: 10),
+              //   child: SizedBox(
+              //     width: 350,
+              //     height: 45,
+              //     child: ElevatedButton.icon(
+              //       onPressed: () {},
+              //       icon: Image.asset(
+              //         'assets/icons/Apple.png',
+              //         height: 20,
+              //       ),
+              //       label: const Text(
+              //         'Sign up with Apple',
+              //         style: TextStyle(color: Colors.black),
+              //       ),
+              //       style: ElevatedButton.styleFrom(
+              //           foregroundColor: Colors.white,
+              //           backgroundColor: Colors.white,
+              //           side: const BorderSide(color: Colors.black12, width: 1.0),
+              //           elevation: 0.0,
+              //           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0))),
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         ),
