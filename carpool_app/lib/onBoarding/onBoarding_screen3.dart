@@ -1,5 +1,4 @@
 import 'package:carpool_app/login/view/login_screen.dart';
-import 'package:carpool_app/login/view/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,9 +21,7 @@ class OnBoardingScreen3 extends StatelessWidget {
             },
             child: const Text(
               'Алгасах',
-              style: TextStyle(
-                color: Colors.black,
-              ),
+              style: TextStyle(color: Colors.black, fontFamily: 'Poppins'),
             ),
           )
         ],
@@ -75,8 +72,8 @@ class OnBoardingScreen3 extends StatelessWidget {
                   Get.to(LoginScreen());
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: AppColors.primary500,
-                  onPrimary: Colors.white,
+                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.primary500,
                   shape: const CircleBorder(),
                   padding: const EdgeInsets.all(24),
                 ),

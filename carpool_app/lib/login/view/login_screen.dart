@@ -1,4 +1,4 @@
-import 'package:carpool_app/components/go_back_button.dart';
+import 'package:carpool_app/home/view/components/go_back_button.dart';
 import 'package:carpool_app/home/logic/home_controller.dart';
 import 'package:carpool_app/home/view/home_screen.dart';
 import 'package:carpool_app/login/logic/login_controller.dart';
@@ -6,7 +6,7 @@ import 'package:carpool_app/login/state/login_state.dart';
 import 'package:carpool_app/signup/view/signup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../components/success_dialog_widget.dart';
+import '../../home/view/components/success_dialog_widget.dart';
 import '../../style/AppColors.dart';
 
 class LoginScreen extends GetWidget<LoginController> {
@@ -16,7 +16,6 @@ class LoginScreen extends GetWidget<LoginController> {
   @override
   Widget build(BuildContext context) {
     LoginState state = controller.state;
-    final formKey = GlobalKey<FormState>();
 
     return Scaffold(
       body: Padding(
@@ -28,7 +27,7 @@ class LoginScreen extends GetWidget<LoginController> {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 15),
               child: Text(
-                'Имейлээ ашиглан нэвтрээрэй.',
+                'Нэвтрэх',
                 style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
               ),
             ),
@@ -102,7 +101,9 @@ class LoginScreen extends GetWidget<LoginController> {
                 child: ElevatedButton(
                   onPressed: () async {
                     Get.lazyPut(() => HomeController());
+                    HomeController homeController = Get.put(HomeController());
                     bool success = await loginController.signInEmailAndPassword();
+                    homeController.loadUserData();
 
                     if (success) {
                       Get.to(() => const HomeScreen());

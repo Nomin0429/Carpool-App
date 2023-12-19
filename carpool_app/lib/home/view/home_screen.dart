@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:carpool_app/components/alert_dialog.dart';
-import 'package:carpool_app/home/component/home_app_bar.dart';
-import 'package:carpool_app/home/component/option_card.dart';
+import 'package:carpool_app/home/view/components/alert_dialog.dart';
+import 'package:carpool_app/home/view/components/home_app_bar.dart';
+import 'package:carpool_app/home/view/components/option_card.dart';
 import 'package:carpool_app/home/logic/home_controller.dart';
 import 'package:carpool_app/home/view/home_screen_driver.dart';
 import 'package:carpool_app/home/view/home_screen_rider.dart';
@@ -49,7 +49,7 @@ class HomeScreen extends StatelessWidget {
                               },
                               title: 'Машин нэмэх',
                               onTapText: 'Машин нэмэх',
-                              subtitle: 'Та аялал үүсгэхийн тулд машинтай байх ёстой. Та машингүй байгаа тул машин нэмэх үү?'))
+                              subtitle: 'Та аялал үүсгэхийн тулд машинтай байх ёстой. Та машингүй байгаа тул машин нэмэх үү?', isCar: true,))
                           : Get.to(HomeScreenDriver());
                     }),
                 const SizedBox(

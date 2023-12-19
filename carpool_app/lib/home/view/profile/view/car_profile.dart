@@ -59,9 +59,11 @@ class CarProfile extends GetWidget<HomeController> {
                 ],
               ),
             ),
-            _homeController.homeState.userData['cars']?.isNotEmpty == true
-                ? MyCarsItem(cars: (_homeController.homeState.userData['cars'] as List).map((item) => Map<String, String>.from(item)).toList())
-                : const Center(child: Text('Танд машин байхгүй байна')),
+            Obx(
+              () => _homeController.homeState.userData['cars']?.isNotEmpty == true
+                  ? MyCarsItem(cars: (_homeController.homeState.userData['cars'] as List).map((item) => Map<String, String>.from(item)).toList())
+                  : const Center(child: Text('Танд машин байхгүй байна')),
+            ),
           ],
         ),
       ),

@@ -73,8 +73,8 @@ class OnBoardingScreen2 extends StatelessWidget {
                   Get.to(const OnBoardingScreen3());
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: AppColors.primary500,
-                  onPrimary: Colors.white,
+                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.primary500,
                   shape: const CircleBorder(),
                   padding: const EdgeInsets.all(24),
                 ),

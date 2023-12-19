@@ -3,8 +3,7 @@ import 'package:carpool_app/style/AppColors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
-
-import '../../../../components/success_dialog_widget.dart';
+import '../../components/success_dialog_widget.dart';
 
 class AddCarDialog extends GetWidget<HomeController> {
   AddCarDialog({super.key});
@@ -45,7 +44,7 @@ class AddCarDialog extends GetWidget<HomeController> {
                       },
                     ),
                   ),
-                  const SizedBox(width: 10), // Spacing between fields
+                  const SizedBox(width: 10),
                   Expanded(
                     flex: 3,
                     child: TextFormField(

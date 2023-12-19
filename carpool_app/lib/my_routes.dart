@@ -7,6 +7,7 @@ import 'package:carpool_app/signup/logic/signup_binding.dart';
 import 'package:carpool_app/signup/view/signup_screen.dart';
 import 'package:get/get.dart';
 
+import 'home/view/home_screen_driver2.dart';
 import 'login/view/welcome_screen.dart';
 
 class MyRoutes {
@@ -22,5 +23,6 @@ class MyRoutes {
     ),
     GetPage(name: Routes.register, page: () => const SignUpScreen(), binding: SignUpBinding()),
     GetPage(name: Routes.homeScreen, page: () => HomeScreen(), binding: HomeBinding()),
+    GetPage(name: Routes.driverScreen2, page: () => HomeScreenDriver2(), binding: HomeBinding()),
   ];
 }

@@ -1,4 +1,5 @@
-import 'dart:developer';
+import 'dart:math';
+import 'package:carpool_app/home/logic/home_controller.dart';
 import 'package:carpool_app/login/view/login_screen.dart';
 import 'package:carpool_app/signup/state/signup_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,6 +12,7 @@ import '../../login/view/welcome_screen.dart';
 class SignUpController extends GetxController {
   static SignUpController get instance => Get.find();
   final SignUpState state = SignUpState();
+  final HomeController homeController = Get.put(HomeController());
 
   final email = TextEditingController();
   final name = TextEditingController();
@@ -38,15 +40,28 @@ class SignUpController extends GetxController {
     user == null ? Get.offAll(() => const WelcomeScreen()) : Get.offAll(() => const HomeScreen());
   }
 
+  // Утасны дугаар дээр validation хийх функц
+  bool isValidPhoneNumber(String value) {
+    return value.trim().length == 8 && int.tryParse(value.trim()) != null;
+  }
+
   ///Хэрэглэгч бүртгэх функц
   Future<bool> registerEmailAndPassword(String email, String password, String name, String phoneNumber) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
-
-      // Get the current user
       User? user = userCredential.user;
 
       if (user != null) {
+        // Давхцаагүй дансны дугаар generate хийх функцийг дуудна.
+        String uniqueAccountNumber = await generateUniqueAccountNumber();
+
+        // Хэтэвчний мэдээллийг тодорхойлох
+        Map<String, dynamic> initialWallet = {
+          'accountNumber': uniqueAccountNumber,
+          'balance': 0.0,
+          'transactions': [],
+        };
+
         await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
           'name': name,
           'phone': phoneNumber,
@@ -55,22 +70,65 @@ class SignUpController extends GetxController {
           'joinedAt': FieldValue.serverTimestamp(),
           'cars': [],
           'rideHistory': {},
+          'avgRating': 0.0,
+          'wallet': initialWallet,
         });
 
-        // Navigate to the HomeScreen
+        homeController.loadUserData();
         Get.offAll(() => const HomeScreen());
         return true;
       } else {
-        // Navigate to the LoginScreen
         Get.to(() => LoginScreen());
         return false;
       }
     } on FirebaseAuthException catch (e) {
-      log('Firebase auth exception: ${e.message}');
+      log('Firebase auth exception: ${e.message}' as num);
       return false;
     } catch (e) {
-      log('General exception: $e');
+      log('General exception: $e' as num);
       return false;
+    }
+  }
+
+// Цор ганц дансны дугаар generate хийх функц
+  Future<String> generateUniqueAccountNumber() async {
+    String potentialAccountNumber = '';
+    bool isUnique = false;
+
+    // Давхцаагүй дансны дугаар generate хийгдтэл давталт гүйнэ.
+    while (!isUnique) {
+      potentialAccountNumber = generateAccountNumber();
+
+      // дансны дугаар давхцаж байгаа үгүйг шалгах функц
+      bool exists = await checkIfAccountNumberExists(potentialAccountNumber);
+
+      // Хэрвээ generated дансны дугаар давхцаагүй бол түүнийг цор ганц буюу давхардаагүй гэж тэмдэглэнэ.
+      if (!exists) {
+        isUnique = true;
+      }
+    }
+
+    return potentialAccountNumber;
+  }
+
+// Дансны дугаар санамсаргүйгээр "xxxx xxxx xxx" ийм форматаар үүсгэх функц
+  String generateAccountNumber() {
+    String part1 = Random().nextInt(10000).toString().padLeft(4, '0');
+    String part2 = Random().nextInt(10000).toString().padLeft(4, '0');
+    String part3 = Random().nextInt(1000).toString().padLeft(3, '0');
+
+    return '$part1 $part2 $part3';
+  }
+
+// Дансны дугаар давхцаж байгаа эсэхийг шалгах функц
+  Future<bool> checkIfAccountNumberExists(String accountNumber) async {
+    try {
+      QuerySnapshot querySnapshot =
+          await FirebaseFirestore.instance.collection('users').where('wallet.accountNumber', isEqualTo: accountNumber).get();
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e) {
+      log('Error checking account number existence: $e' as num);
+      return true;
     }
   }
 }

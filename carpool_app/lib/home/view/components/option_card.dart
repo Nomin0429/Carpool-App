@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../style/AppColors.dart';
+import '../../../style/AppColors.dart';
 
 class OptionCard extends StatelessWidget {
   final String title;
@@ -54,7 +54,8 @@ class OptionCard extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         description,
-                        style: const TextStyle(fontSize: 12, color: AppColors.textInfo, fontWeight: FontWeight.w300),
+                        overflow: TextOverflow.visible,
+                        style: const TextStyle(fontSize: 11, color: AppColors.textInfo, fontWeight: FontWeight.w300),
                       ),
                     ],
                   ),
