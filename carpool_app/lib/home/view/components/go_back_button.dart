@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
-///Буцах товчны widget
+///Буцах товч widget
 class GoBackButton extends StatelessWidget {
   const GoBackButton({super.key});
 
@@ -22,7 +22,7 @@ class GoBackButton extends StatelessWidget {
               ),
               Text(
                 'Буцах',
-                style: TextStyle(fontSize: 15),
+                style: TextStyle(fontSize: 15, fontFamily: 'Poppins'),
               ),
             ],
           ),

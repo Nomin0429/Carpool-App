@@ -1,11 +1,14 @@
 import 'dart:developer';
-import 'package:carpool_app/components/go_back_button.dart';
+import 'package:carpool_app/home/view/components/go_back_button.dart';
+import 'package:carpool_app/home/view/components/time_input_getter.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
-import '../../components/form_field_item.dart';
+import 'components/custom_autocomplete.dart';
+import 'components/form_field_item.dart';
 import '../../style/AppColors.dart';
 import '../logic/home_controller.dart';
+import 'components/possible_stops_getter.dart';
 import 'home_screen_driver2.dart';
 
 class HomeScreenDriver extends GetWidget<HomeController> {
@@ -15,6 +18,13 @@ class HomeScreenDriver extends GetWidget<HomeController> {
   @override
   Widget build(BuildContext context) {
     final userData = _homeController.homeState.userData;
+    RxBool allFieldsFilled = false.obs;
+    void checkIfAllFieldsFilled() {
+      allFieldsFilled.value = _homeController.originController.text.isNotEmpty &&
+          _homeController.destinationController.text.isNotEmpty &&
+          _homeController.seatsAvailableController.text.isNotEmpty;
+    }
+
     final List<dynamic> cars = (userData['cars'] ?? []) as List<dynamic>;
     final List<String> serialNumbers = List<String>.from(cars.map((car) => car['serialNo'] ?? ''));
     if (serialNumbers.isNotEmpty) {
@@ -25,17 +35,6 @@ class HomeScreenDriver extends GetWidget<HomeController> {
       _homeController.dayController.text = 'Өнөөдөр';
     }
     var dayText = 'Өнөөдөр'.obs;
-
-    bool isValidTime(String? value) {
-      if (value == null || value.isEmpty) return false;
-      final parts = value.split(':');
-      if (parts.length != 2) return false;
-      final hour = int.tryParse(parts[0]);
-      final minute = int.tryParse(parts[1]);
-      if (hour == null || minute == null) return false;
-      if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return false;
-      return true;
-    }
 
     return Scaffold(
       body: SafeArea(
@@ -51,87 +50,115 @@ class HomeScreenDriver extends GetWidget<HomeController> {
                 ),
                 const Text(
                   'Аялал үүсгэхэд шаардлагатай мэдээллийг оруулна уу',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
                 ),
                 const SizedBox(
                   height: 40,
                 ),
-                FormFieldItem(
+                CustomAutocomplete(
                   controller: _homeController.originController,
-                  hintText: 'Хаанаас хөдлөх',
-                  height: 70,
-                  width: 340,
+                  hintText: 'Хөдлөх цэг',
                   icon: const Icon(LineAwesomeIcons.bullseye),
                   borderColor: AppColors.primary550,
                   borderRadius: 20,
-                  onChanged: (value) {
-                    _homeController.checkIfAllFieldsFilled();
-                  },
+                  isTextBlack: true,
+                  height: 70,
+                  width: 340,
+                  isOrigin: true,
                 ),
                 const SizedBox(
                   height: 10,
                 ),
-                FormFieldItem(
+                CustomAutocomplete(
                   controller: _homeController.destinationController,
                   hintText: 'Хаашаа очих',
                   height: 70,
                   width: 340,
+                  isTextBlack: true,
                   icon: const Icon(LineAwesomeIcons.map_marker),
                   borderColor: AppColors.primary550,
                   borderRadius: 20,
-                  onChanged: (value) {
-                    _homeController.checkIfAllFieldsFilled();
-                  },
+                  isOrigin: false,
                 ),
-                // const SizedBox(
-                //   height: 5,
-                // ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 3),
                   child: Text(
-                    'Та боломжит зогсоолууд хэсэгт өөрийн явах замаа тодорхой болгох үүднээс хэдэн зогсоолыг оруулж өгнө үү.',
+                    'Таны боломжит зогсоолуудад оруулсан зогсоолуудаас хэрэглэгч өөрийн буух суух цэгийг сонгох тул боломжит бүх зогсоолыг оруулна уу.',
                     style: TextStyle(fontSize: 10, color: Colors.black26.withOpacity(0.4)),
                   ),
                 ),
-                FormFieldItem(
-                  controller: _homeController.possibleStopsController,
-                  hintText: 'Боломжит зогсоолууд',
-                  height: 70,
-                  width: 340,
-                  icon: const Icon(LineAwesomeIcons.parking),
-                  borderColor: AppColors.primary550,
-                  borderRadius: 20,
-                  onChanged: (value) {
-                    _homeController.checkIfAllFieldsFilled();
-                  },
+                PossibleStopsGetter(),
+                const SizedBox(
+                  height: 8,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 9),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          height: 57,
+                          width: 170,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: AppColors.primary550),
+                          ),
+                          child: Obx(
+                            () => DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: dayText.value,
+                                onChanged: (newValue) {
+                                  dayText.value = newValue!;
+                                  _homeController.dayController.text = newValue;
+                                  log('daycontroller: ${_homeController.dayController.text}');
+                                  log('Selected value: $newValue');
+                                  checkIfAllFieldsFilled();
+                                },
+                                items: const ['Өнөөдөр', 'Маргааш'].map((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      TimeInputGetter(
+                        onTimeSelected: (TimeOfDay selectedTime) {
+                          checkIfAllFieldsFilled();
+                          _homeController.selectedTime = selectedTime;
+                          log("Selected Time: $selectedTime");
+                        },
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(
-                  height: 10,
+                  height: 15,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Flexible(
-                      child: Container(
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 9.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                          child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 15),
-                        height: 50,
+                        height: 57,
                         width: 150,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppColors.primary550),
-                        ),
+                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.primary550)),
                         child: Obx(
                           () => DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
-                              value: dayText.value,
+                              value: _homeController.homeState.carSerialNo.value,
                               onChanged: (newValue) {
-                                dayText.value = newValue!;
-                                _homeController.dayController.text = newValue;
-
-                                log('Selected value: $newValue');
-                                _homeController.checkIfAllFieldsFilled();
+                                _homeController.homeState.carSerialNo.value = newValue!;
                               },
-                              items: const ['Өнөөдөр', 'Маргааш'].map((String value) {
+                              items: serialNumbers.map((String value) {
                                 return DropdownMenuItem<String>(
                                   value: value,
                                   child: Text(value),
@@ -140,92 +167,51 @@ class HomeScreenDriver extends GetWidget<HomeController> {
                             ),
                           ),
                         ),
+                      )),
+                      FormFieldItem(
+                        controller: _homeController.seatsAvailableController,
+                        hintText: 'Сул суудал',
+                        height: 57,
+                        width: 160,
+                        icon: const Icon(LineAwesomeIcons.user),
+                        borderColor: AppColors.primary550,
+                        borderRadius: 20,
+                        onChanged: (value) {
+                          checkIfAllFieldsFilled();
+                          log('seatsAvailableController: ${_homeController.seatsAvailableController.text}');
+                        },
                       ),
-                    ),
-                    const SizedBox(
-                      width: 30,
-                    ),
-                    FormFieldItem(
-                      controller: _homeController.timeController,
-                      hintText: 'hh:mm',
-                      height: 50,
-                      width: 150,
-                      icon: const Icon(LineAwesomeIcons.clock),
-                      borderColor: AppColors.primary550,
-                      borderRadius: 20,
-                      inputFormat: 'hh:mm',
-                      onChanged: (value) {
-                        if (!isValidTime(value)) {
-                          log('invalidtime');
-                        }
-                        _homeController.checkIfAllFieldsFilled();
-                      },
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 const SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Flexible(
-                        child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      height: 50,
-                      width: 150,
-                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.primary550)),
-                      child: Obx(
-                        () => DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: _homeController.homeState.carSerialNo.value,
-                            onChanged: (newValue) {
-                              _homeController.homeState.carSerialNo.value = newValue!;
-                              _homeController.checkIfAllFieldsFilled();
-                            },
-                            items: serialNumbers.map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-                    )),
-                    const SizedBox(width: 30),
-                    FormFieldItem(
-                      controller: _homeController.seatsAvailableController,
-                      hintText: 'Сул суудал',
-                      height: 70,
-                      width: 150,
-                      icon: const Icon(LineAwesomeIcons.user),
-                      borderColor: AppColors.primary550,
-                      borderRadius: 20,
-                      onChanged: (value) {
-                        _homeController.checkIfAllFieldsFilled();
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 20,
+                  height: 40,
                 ),
                 SizedBox(
                   width: 320,
                   height: 54,
                   child: Obx(
                     () => ElevatedButton(
-                      onPressed: _homeController.allFieldsFilled.value
+                      onPressed: allFieldsFilled.value
                           ? () {
-                              Get.to(() => HomeScreenDriver2());
+                              try {
+                                Get.to(() => HomeScreenDriver2());
+                              } catch (e) {
+                                log('Navigation Error: $e');
+                              }
                             }
                           : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _homeController.allFieldsFilled.value ? AppColors.error800 : AppColors.error200,
+                        backgroundColor: allFieldsFilled.value ? AppColors.primary550 : AppColors.error100,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       ),
-                      child: const Text('Цааш нь'),
+                      child: Text(
+                        'Цааш нь',
+                        style: TextStyle(
+                            fontSize: 15,
+                            color: allFieldsFilled.value ? Colors.white : Colors.black,
+                            fontWeight: allFieldsFilled.value ? FontWeight.w600 : FontWeight.w300),
+                      ),
                     ),
                   ),
                 ),

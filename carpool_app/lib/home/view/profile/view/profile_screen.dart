@@ -1,14 +1,15 @@
-import 'package:carpool_app/components/go_back_button.dart';
+import 'package:carpool_app/home/view/components/go_back_button.dart';
 import 'package:carpool_app/home/logic/home_controller.dart';
 import 'package:carpool_app/home/view/profile/components/profile_menu_item.dart';
 import 'package:carpool_app/home/view/profile/view/car_profile.dart';
+import 'package:carpool_app/home/view/profile/view/wallet/my_wallet_screen.dart';
 import 'package:carpool_app/home/view/profile/view/ride_history_screen.dart';
 import 'package:carpool_app/home/view/profile/view/update_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
-import '../../../../components/alert_dialog.dart';
+import '../../components/alert_dialog.dart';
 import '../../../../style/AppColors.dart';
 
 class ProfileScreen extends GetWidget<HomeController> {
@@ -37,7 +38,6 @@ class ProfileScreen extends GetWidget<HomeController> {
                       },
                       icon: const Icon(LineAwesomeIcons.car),
                       style: IconButton.styleFrom(
-                          backgroundColor: AppColors.primary300,
                           shape:
                               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: AppColors.primary500))),
                     )
@@ -114,24 +114,19 @@ class ProfileScreen extends GetWidget<HomeController> {
                 ),
 
                 ///menu
-                // ProfileMenuItem(
-                //   title: 'Таны бүртгэл',
-                //   icon: LineAwesomeIcons.user,
-                //   onTap: () {
-                //     null;
-                //   },
-                // ),
                 ProfileMenuItem(
-                  title: 'Аялалын түүх',
+                  title: 'Аяллын түүх',
                   icon: LineAwesomeIcons.history,
                   onTap: () {
-                    Get.to(const MyRidesScreen());
+                    Get.to(const RideHistoryScreen());
                   },
                 ),
                 ProfileMenuItem(
-                  title: 'Гомдол гаргах',
-                  icon: LineAwesomeIcons.comment,
-                  onTap: () {},
+                  title: 'Миний хэтэвч',
+                  icon: LineAwesomeIcons.wallet,
+                  onTap: () {
+                    Get.to(MyWallet());
+                  },
                 ),
                 ProfileMenuItem(
                   title: 'Бидний тухай',
@@ -162,6 +157,7 @@ class ProfileScreen extends GetWidget<HomeController> {
                         title: 'Системээс гарах',
                         onTapText: 'Гарах',
                         subtitle: 'Та системээс гарахдаа итгэлтэй байна уу?',
+                        isCar: false,
                       ),
                     );
                   },

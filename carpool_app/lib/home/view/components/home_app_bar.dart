@@ -2,8 +2,8 @@ import 'package:carpool_app/home/view/profile/view/profile_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
-import '../../components/go_back_button.dart';
-import '../../components/image_button_widget.dart';
+import 'go_back_button.dart';
+import 'image_button_widget.dart';
 
 class HomeAppBar extends StatelessWidget {
   final bool isHome;

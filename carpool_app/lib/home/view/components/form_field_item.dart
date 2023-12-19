@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../home/component/custom_input_formatter.dart';
-import '../style/AppColors.dart';
+import 'package:flutter/widgets.dart';
+import '../../../style/AppColors.dart';
+import 'custom_input_formatter.dart';
 
 class FormFieldItem extends StatelessWidget {
   final dynamic controller;
@@ -13,6 +14,7 @@ class FormFieldItem extends StatelessWidget {
   final bool isTextBlack;
   final ValueChanged<String?>? onChanged;
   final String? inputFormat;
+  final FormFieldValidator<String>? validator;
 
   const FormFieldItem({
     Key? key,
@@ -26,6 +28,7 @@ class FormFieldItem extends StatelessWidget {
     this.isTextBlack = false,
     this.onChanged,
     this.inputFormat,
+    this.validator,
   }) : super(key: key);
 
   @override
@@ -37,6 +40,8 @@ class FormFieldItem extends StatelessWidget {
         controller: controller,
         inputFormatters: inputFormat != null ? [CustomInputFormatter(inputFormat: inputFormat!)] : null,
         decoration: _inputDecoration,
+        onChanged: onChanged,
+        validator: validator,
       ),
     );
   }
@@ -51,12 +56,12 @@ class FormFieldItem extends StatelessWidget {
         fontWeight: FontWeight.w500,
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: borderColor ?? AppColors.primary550, width: 1),
-        borderRadius: BorderRadius.circular(borderRadius ?? 8.0),
+        borderSide: BorderSide(color: borderColor ?? AppColors.primary300, width: 1),
+        borderRadius: BorderRadius.circular(borderRadius ?? 15.0),
       ),
       enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: borderColor ?? AppColors.primary550, width: 1),
-        borderRadius: BorderRadius.circular(borderRadius ?? 8.0),
+        borderSide: BorderSide(color: borderColor ?? AppColors.primary300, width: 1),
+        borderRadius: BorderRadius.circular(borderRadius ?? 15.0),
       ),
     );
   }

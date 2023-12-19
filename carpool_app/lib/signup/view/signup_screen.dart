@@ -1,24 +1,30 @@
 import 'dart:developer';
 
-import 'package:carpool_app/components/go_back_button.dart';
+import 'package:carpool_app/home/view/components/go_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
 import '../../style/AppColors.dart';
-import '../../components/form_field_item.dart';
+import '../../home/view/components/form_field_item.dart';
 import '../component/auto_close_dialog.dart';
 import '../logic/signup_controller.dart';
 
-///todo: Registration amjilttai bolson dialog haruulah
-class SignUpScreen extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final SignUpController signUpController = Get.put(SignUpController());
-    final formKey = GlobalKey<FormState>();
+  _SignUpScreenState createState() => _SignUpScreenState();
+}
 
+class _SignUpScreenState extends State<SignUpScreen> {
+  final SignUpController signUpController = Get.put(SignUpController());
+  final formKey = GlobalKey<FormState>();
+  bool isFormFilled = false;
+  bool showErrorText = false;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.only(top: 60, left: 15, right: 15),
@@ -26,45 +32,68 @@ class SignUpScreen extends StatelessWidget {
           child: Column(
             children: [
               const GoBackButton(),
-              const SizedBox(
-                height: 20,
-              ),
+              const SizedBox(height: 20),
               const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
                   'Доорх хэсгүүдийг бөглөн бүртгүүлээрэй',
-                  style: TextStyle(fontSize: 27),
+                  style: TextStyle(fontSize: 27, fontFamily: 'Poppins'),
                 ),
               ),
+              showErrorText
+                  ? const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        'Бүх талбарыг бөглөх шаардлагатай',
+                        style: TextStyle(color: AppColors.error900, fontFamily: 'Poppins'),
+                      ),
+                    )
+                  : const SizedBox(),
               const SizedBox(height: 20),
               Form(
                 key: formKey,
+                onChanged: () {
+                  setState(() {
+                    isFormFilled = formKey.currentState?.validate() ?? false;
+                  });
+                },
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     FormFieldItem(
-                      hintText: 'Нэр',
+                      hintText: 'Нэр${isFormFilled ? '' : ' *'}',
                       height: 70,
                       width: 360,
                       controller: signUpController.name,
                       icon: const Icon(LineAwesomeIcons.user),
                     ),
                     FormFieldItem(
-                      hintText: 'Имейл',
+                      hintText: 'Имейл${isFormFilled ? '' : ' *'}',
                       height: 70,
                       width: 360,
                       controller: signUpController.email,
                       icon: const Icon(LineAwesomeIcons.envelope),
                     ),
                     FormFieldItem(
-                      hintText: 'Утасны дугаар',
+                      hintText: 'Утасны дугаар${isFormFilled ? '' : ' *'}',
                       height: 70,
                       width: 360,
                       controller: signUpController.phoneNo,
                       icon: const Icon(LineAwesomeIcons.phone),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          if (showErrorText && value == null) {
+                            return 'Утасны дугаараа оруулна уу';
+                          }
+                          return null;
+                        } else if (!signUpController.isValidPhoneNumber(value)) {
+                          return 'Утасны дугаар буруу байна';
+                        }
+                        return null;
+                      },
                     ),
                     FormFieldItem(
-                      hintText: 'Нууц үг',
+                      hintText: 'Нууц үг${isFormFilled ? '' : ' *'}',
                       height: 70,
                       width: 360,
                       controller: signUpController.password,
@@ -73,30 +102,6 @@ class SignUpScreen extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // SizedBox(
-              //   height: 70,
-              //   width: 360,
-              //   child: DropdownButtonFormField<String>(
-              //     decoration: InputDecoration(
-              //         contentPadding: const EdgeInsets.all(18),
-              //         hintText: 'Gender',
-              //         hintStyle: const TextStyle(color: Colors.grey),
-              //         enabledBorder: OutlineInputBorder(
-              //           borderSide: const BorderSide(width: 1, color: Colors.black12),
-              //           borderRadius: BorderRadius.circular(8.0),
-              //         )),
-              //     onChanged: (String? newValue) {
-              //       state.userGender = newValue!;
-              //     },
-              //     items: <String>['Female', 'Male'].map<DropdownMenuItem<String>>((String value) {
-              //       return DropdownMenuItem<String>(
-              //         value: value,
-              //         child: Text(value),
-              //       );
-              //     }).toList(),
-              //   ),
-              // ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 child: SizedBox(
@@ -104,6 +109,10 @@ class SignUpScreen extends StatelessWidget {
                   height: 54,
                   child: ElevatedButton(
                     onPressed: () async {
+                      setState(() {
+                        showErrorText = !isFormFilled;
+                      });
+
                       if (signUpController.isValidEmail(signUpController.email.text.trim())) {
                         if (formKey.currentState!.validate()) {
                           bool success = await SignUpController.instance.registerEmailAndPassword(
@@ -115,104 +124,30 @@ class SignUpScreen extends StatelessWidget {
 
                           if (success) {
                             Get.dialog(const AutoCloseDialog(
-                              title: 'Таны бүртгэл амжилттай үүслээ.',
+                              title: 'Амжилттай',
+                              content: 'Таны бүртгэл амжилттай үүслээ.',
                             ));
                           } else {
                             log('email: ${signUpController.email.text.trim()}');
                             Get.dialog(const AutoCloseDialog(
-                              title: 'Амжилтгүй, та дахин оролдоно уу.',
+                              title: 'Амжилтгүй',
+                              content: 'Амжилтгүй, та дахин оролдоно уу.',
                             ));
                           }
                         }
                       }
                     },
                     style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(AppColors.primary700),
-                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)))),
-                    child: const Text('Бүртгүүлэх', style: TextStyle(fontSize: 15)),
+                      backgroundColor: MaterialStateProperty.all<Color>(AppColors.primary700),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+                      ),
+                    ),
+                    child: const Text('Бүртгүүлэх', style: TextStyle(fontSize: 15, fontFamily: 'Poppins')),
                   ),
                 ),
               ),
-              const Row(
-                children: [
-                  Expanded(child: Divider()),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 10.0),
-                    child: Text('эсвэл', style: TextStyle(fontSize: 15, color: Colors.black12)),
-                  ),
-                  Expanded(child: Divider()),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: SizedBox(
-                  width: 350,
-                  height: 45,
-                  child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: Image.asset(
-                        'assets/icons/Gmail.png',
-                        height: 20,
-                      ),
-                      label: const Text(
-                        'Gmail-ээр бүртгүүлэх',
-                        style: TextStyle(color: Colors.black),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Colors.white,
-                          side: const BorderSide(color: Colors.black12, width: 1),
-                          elevation: 0.0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)))),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: SizedBox(
-                  width: 350,
-                  height: 45,
-                  child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: Image.asset(
-                        'assets/icons/Facebook.png',
-                        height: 20,
-                      ),
-                      label: const Text(
-                        'Facebook-ээр бүртгүүлэх',
-                        style: TextStyle(color: Colors.black),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Colors.white,
-                          side: const BorderSide(color: Colors.black12, width: 1),
-                          elevation: 0.0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)))),
-                ),
-              ),
-              // Padding(
-              //   padding: const EdgeInsets.symmetric(vertical: 10),
-              //   child: SizedBox(
-              //     width: 350,
-              //     height: 45,
-              //     child: ElevatedButton.icon(
-              //       onPressed: () {},
-              //       icon: Image.asset(
-              //         'assets/icons/Apple.png',
-              //         height: 20,
-              //       ),
-              //       label: const Text(
-              //         'Sign up with Apple',
-              //         style: TextStyle(color: Colors.black),
-              //       ),
-              //       style: ElevatedButton.styleFrom(
-              //           foregroundColor: Colors.white,
-              //           backgroundColor: Colors.white,
-              //           side: const BorderSide(color: Colors.black12, width: 1.0),
-              //           elevation: 0.0,
-              //           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0))),
-              //     ),
-              //   ),
-              // ),
+              // Other widgets...
             ],
           ),
         ),

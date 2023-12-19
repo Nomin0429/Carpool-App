@@ -7,8 +7,10 @@ class ShowAlertDialog extends StatelessWidget {
   final String title;
   final String subtitle;
   final String onTapText;
+  final bool isCar;
 
-  const ShowAlertDialog({Key? key, required this.onTap, required this.title, required this.onTapText, required this.subtitle}) : super(key: key);
+  const ShowAlertDialog({Key? key, required this.onTap, required this.title, required this.onTapText, required this.subtitle, required this.isCar})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

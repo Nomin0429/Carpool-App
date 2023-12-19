@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
-import '../../../../components/alert_dialog.dart';
+import '../../components/alert_dialog.dart';
 import '../../../../style/AppColors.dart';
 
 class UpdateProfileScreen extends GetWidget<HomeController> {
@@ -182,6 +182,7 @@ class UpdateProfileScreen extends GetWidget<HomeController> {
                                 title: 'Бүртгэл устгах',
                                 onTapText: 'Устгах',
                                 subtitle: 'Та бүртгэлээ устгахдаа итгэлтэй байна уу?',
+                                isCar: false,
                               ),
                             );
                           },
