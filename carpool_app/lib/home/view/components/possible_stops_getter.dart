@@ -1,4 +1,5 @@
 import 'package:carpool_app/home/view/components/custom_autocomplete.dart';
+import 'package:carpool_app/style/AppColors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:carpool_app/home/logic/home_controller.dart';
@@ -6,7 +7,7 @@ import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 class PossibleStopsGetter extends GetWidget<HomeController> {
-  PossibleStopsGetter({Key? key}) : super(key: key);
+  const PossibleStopsGetter({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -15,6 +16,7 @@ class PossibleStopsGetter extends GetWidget<HomeController> {
     void onSelected(String stop) {
       if (!homeController.homeState.selectedStops.contains(stop) && stop.isNotEmpty) {
         homeController.homeState.selectedStops.add(stop);
+        controller.possibleStopsController.text = controller.homeState.selectedStops.join(', ');
       }
     }
 
@@ -30,27 +32,16 @@ class PossibleStopsGetter extends GetWidget<HomeController> {
         }, onSelected: (String selection) {
           onSelected(selection);
         }, fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) {
-          // return TextField(
-          //   controller: textEditingController,
-          //   focusNode: focusNode,
-          //   decoration: InputDecoration(
-          //     hintText: 'Type and add a stop',
-          //     suffixIcon: IconButton(
-          //       icon: const Icon(Icons.add),
-          //       onPressed: () {
-          //         onSelected(textEditingController.text);
-          //         textEditingController.clear();
-          //       },
-          //     ),
-          //   ),
-          // );
-          return Row(children: [
-            CustomAutocomplete(
+          return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            CustomAutoComplete(
               controller: textEditingController,
-              hintText: 'Та өөрийн хүссэн зогсоолыг нэмж оруулах боломжтой',
-              icon: const Icon(LineAwesomeIcons.parking),
+              hintText: 'Зогсоол нэмж оруулах',
+              icon: const Icon(
+                LineAwesomeIcons.parking,
+                color: AppColors.primary300,
+              ),
               height: 70,
-              width: 300,
+              width: 285,
               isOrigin: true,
             ),
             IconButton(
@@ -58,19 +49,38 @@ class PossibleStopsGetter extends GetWidget<HomeController> {
                   onSelected(textEditingController.text);
                   textEditingController.clear();
                 },
-                icon: const Icon(LineAwesomeIcons.plus_circle)),
+                icon: const Icon(
+                  LineAwesomeIcons.plus_circle,
+                  color: AppColors.primary300,
+                )),
           ]);
         }),
         Obx(
-          () => MultiSelectDialogField(
-            items: homeController.homeState.allRoutesBusStops.expand((i) => i).toSet().map((stop) => MultiSelectItem<String>(stop, stop)).toList(),
-            title: const Text("Select Bus Stops"),
-            onConfirm: (values) {
-              for (var stop in values) {
-                onSelected(stop as String);
-              }
-            },
-            chipDisplay: MultiSelectChipDisplay.none(),
+          () => SizedBox(
+            width: MediaQuery.of(context).size.width * 0.85,
+            child: MultiSelectDialogField(
+              buttonIcon: const Icon(
+                LineAwesomeIcons.arrow_down,
+                color: AppColors.primary300,
+              ),
+              items: homeController.homeState.allRoutesBusStops.expand((i) => i).toSet().map((stop) => MultiSelectItem<String>(stop, stop)).toList(),
+              title: const Text("Боломжит зогсоолууд"),
+              onConfirm: (values) {
+                for (var stop in values) {
+                  onSelected(stop as String);
+                }
+              },
+              chipDisplay: MultiSelectChipDisplay.none(),
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: AppColors.primary300,
+                    width: 2.0,
+                  ),
+                ),
+              ),
+              confirmText: const Text("Болсон"),
+            ),
           ),
         ),
         Obx(() => Wrap(

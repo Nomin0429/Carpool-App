@@ -1,8 +1,6 @@
-import 'package:carpool_app/home/view/components/form_field_item.dart';
+import 'dart:developer';
 import 'package:carpool_app/home/logic/home_controller.dart';
-import 'package:carpool_app/home/view/home_screen.dart';
 import 'package:carpool_app/home/view/ride_input_by_rider/ride_details_rider_to_ride.dart';
-import 'package:carpool_app/style/AppColors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
@@ -17,11 +15,12 @@ class HomeScreenRider extends GetWidget<HomeController> {
     return Scaffold(
       body: SafeArea(
         child: DefaultTabController(
-          length: 2,
+          length: 1,
           child: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               return [
                 SliverAppBar(
+                  title: const Text('Бүх унаанууд'),
                   leading: IconButton(
                       onPressed: () {
                         Get.back();
@@ -33,17 +32,7 @@ class HomeScreenRider extends GetWidget<HomeController> {
                   backgroundColor: Colors.transparent,
                   elevation: 0.0,
                   pinned: true,
-                  bottom: const TabBar(
-                    indicatorColor: AppColors.primary300,
-                    labelColor: AppColors.primary300,
-                    unselectedLabelColor: Colors.black,
-                    labelStyle: TextStyle(fontSize: 16, fontFamily: 'Poppins'),
-                    unselectedLabelStyle: TextStyle(fontSize: 16, fontFamily: 'Poppins'),
-                    tabs: [
-                      Tab(text: 'Бүх унаанууд'),
-                      Tab(text: 'Хайх'),
-                    ],
-                  ),
+                  // Remove the TabBar
                 ),
               ];
             },
@@ -71,8 +60,9 @@ class HomeScreenRider extends GetWidget<HomeController> {
                               ride: ride,
                               textButton: 'Дайгдая',
                               onTapTextButton: () async {
+                                log('nomioo ride: $ride');
                                 await _homeController.updateDriverData(ride);
-                                Get.to(RideDetailsRiderToRide(ride: ride));
+                                Get.to(RideDetailsRiderToRide(ride: ride, rideId: rideId));
                               },
                             );
                           }
@@ -81,49 +71,6 @@ class HomeScreenRider extends GetWidget<HomeController> {
                       );
                     }),
                   ]),
-                ),
-                SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      const Text(
-                        'Аялал хайхад шаардлагатай мэдээллийг оруулна уу.',
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(
-                        height: 60,
-                      ),
-                      const FormFieldItem(
-                        hintText: 'Хаанаас хөдлөх',
-                        height: 70,
-                        width: 340,
-                        icon: Icon(LineAwesomeIcons.bullseye),
-                        borderRadius: 20,
-                        borderColor: AppColors.primary300,
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      SizedBox(
-                        width: 320,
-                        height: 54,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Get.to(() => const HomeScreen());
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.error800,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                          child: const Text('Хайх'),
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ],
             ),

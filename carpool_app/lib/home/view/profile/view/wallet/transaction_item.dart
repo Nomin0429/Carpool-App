@@ -71,7 +71,7 @@ class TransactionItem extends StatelessWidget {
                   ),
                   if (transaction['transactionType'] == 'charge')
                     const Text(
-                      "Цэнэглэлт",
+                      "Данс цэнэглэлт",
                       style: TextStyle(
                         fontFamily: 'Rubik',
                         fontSize: 15.0,

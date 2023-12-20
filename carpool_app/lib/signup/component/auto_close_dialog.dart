@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:get/get.dart';
 import '../../style/AppColors.dart';
 
 class AutoCloseDialog extends StatelessWidget {
@@ -29,17 +29,15 @@ class AutoCloseDialog extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const SizedBox(
-                    width: 15,
-                  ),
                   Text(
                     title,
                     style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
                   ),
-                  const SizedBox(width: 10),
                   IconButton(
                     icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () {
+                      Get.back();
+                    },
                   ),
                 ],
               ),

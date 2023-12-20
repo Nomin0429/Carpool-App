@@ -1,15 +1,18 @@
-import 'package:carpool_app/home/logic/home_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../style/AppColors.dart';
+import '../../logic/home_controller.dart';
 
 class RiderInputToRide extends GetWidget<HomeController> {
   final String hintText;
+  final TextEditingController textController;
   final Icon icon;
   final bool isOrigin;
   final Map ride;
 
   const RiderInputToRide({
     Key? key,
+    required this.textController,
     required this.hintText,
     required this.icon,
     required this.ride,
@@ -18,39 +21,52 @@ class RiderInputToRide extends GetWidget<HomeController> {
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController textController = TextEditingController();
+    List<DropdownMenuItem<String>> dropdownItems = getDropdownItems(ride);
+    String? initialValue = dropdownItems.any((item) => item.value == textController.text) ? textController.text : null;
 
-    return TextFormField(
-      controller: textController,
+    return DropdownButtonFormField<String>(
+      isExpanded: true,
       decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(style: BorderStyle.solid)),
+        contentPadding: const EdgeInsets.fromLTRB(12, 15, 12, 15),
+        border: const UnderlineInputBorder(),
+        enabledBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: AppColors.primary700),
+        ),
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Theme.of(context).primaryColor),
+        ),
         hintText: hintText,
-        prefixIcon: icon,
-        suffixIcon: DropdownButton<String>(
-          underline: Container(),
-          onChanged: (String? newValue) {
-            textController.text = newValue! ?? '';
-            isOrigin ? controller.riderOriginController.text = newValue : controller.riderDestinationController.text = newValue;
-          },
-          items: [
-            DropdownMenuItem<String>(
-              value: ride['origin'].toString(),
-              child: Text(ride['origin'].toString()),
-            ),
-            ...(ride['possibleStops'] as List<dynamic>).map((stop) {
-              return DropdownMenuItem<String>(
-                value: stop.toString(),
-                child: Text(stop.toString()),
-              );
-            }).toList(),
-            DropdownMenuItem<String>(
-              value: ride['destination'].toString(),
-              child: Text(ride['destination'].toString()),
-            ),
-          ],
+        alignLabelWithHint: true,
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(top: 15),
+          child: icon,
         ),
       ),
+      value: initialValue,
+      onChanged: (String? newValue) {
+        if (newValue != null) {
+          textController.text = newValue;
+          if (isOrigin) {
+            controller.riderOriginController.text = newValue;
+          } else {
+            controller.riderDestinationController.text = newValue;
+          }
+          (context as Element).markNeedsBuild();
+        }
+      },
+      items: dropdownItems,
     );
+  }
+
+  List<DropdownMenuItem<String>> getDropdownItems(Map ride) {
+    Set<String> valuesSet = {ride['origin'], ride['destination']};
+    valuesSet.addAll(List<String>.from(ride['possibleStops']));
+
+    return valuesSet.map((String value) {
+      return DropdownMenuItem<String>(
+        value: value,
+        child: Text(value),
+      );
+    }).toList();
   }
 }

@@ -27,11 +27,9 @@ class ProfileScreen extends GetWidget<HomeController> {
             child: Column(
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const GoBackButton(),
-                    const SizedBox(
-                      width: 230,
-                    ),
                     IconButton(
                       onPressed: () {
                         Get.to(CarProfile());
@@ -125,7 +123,8 @@ class ProfileScreen extends GetWidget<HomeController> {
                   title: 'Миний хэтэвч',
                   icon: LineAwesomeIcons.wallet,
                   onTap: () {
-                    Get.to(MyWallet());
+                    controller.fetchTransactions(controller.getUserId());
+                    Get.to(const MyWallet());
                   },
                 ),
                 ProfileMenuItem(

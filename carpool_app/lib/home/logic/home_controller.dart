@@ -11,11 +11,14 @@ import '../../login/view/login_screen.dart';
 import '../../signup/component/auto_close_dialog.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class HomeController extends GetxController {
   HomeState homeState = HomeState();
   late final Function debouncedUpdateSuggestions;
   TimeOfDay? selectedTime;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final User? currentUser = FirebaseAuth.instance.currentUser;
 
   HomeController() {
     debouncedUpdateSuggestions = debounce(() {}, 500);
@@ -41,19 +44,55 @@ class HomeController extends GetxController {
     getGreeting();
     loadUserData();
     await getWeatherData(homeState.lat, homeState.lon);
+    await updateFCMToken();
     listenToRides();
     fetchTransactions(getUserId());
-    //getPossibleStops();
-    //deleteOverdueRides();
   }
 
-  // Future<Position> _getCurrentLocation() async {
-  //   homeState.locationPermission = await Geolocator.isLocationServiceEnabled();
-  //   if (!homeState.locationPermission) {
-  //     LocationPermission permission = await Geolocator.checkPermission();
-  //   }
-  //   return await Geolocator.getCurrentPosition();
-  // }
+  ///notif ywuulahh permission awah function
+  void requestPermission() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      provisional: false,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      log('User granted permission');
+    } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+      log('User granted provisional permission');
+    } else {
+      log('User declined or has not accepted permission');
+    }
+  }
+
+  Future<void> updateFCMToken() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        NotificationSettings settings = await FirebaseMessaging.instance.requestPermission();
+        if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+          String? fcmToken = await FirebaseMessaging.instance.getToken();
+          if (fcmToken != null) {
+            await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+              'fcmToken': fcmToken,
+            });
+          } else {
+            log("FCM Token is null.");
+          }
+        } else {
+          log("Notification permission denied.");
+        }
+      } else {
+        log("User is not logged in.");
+      }
+    } catch (e) {
+      log('Error updating FCM Token: $e');
+    }
+  }
 
   ///Цагаас хамааран мэндчилгээний үг буцаах функц
   String getGreeting() {
@@ -214,10 +253,27 @@ class HomeController extends GetxController {
   //     timeOfDay?.minute ?? 0,
   //   );
   // }
+  Future<void> getUserDataByUserId(String userId) async {
+    DocumentReference docRef = FirebaseFirestore.instance.collection('users').doc(userId);
+
+    try {
+      DocumentSnapshot<Object?> doc = await docRef.get();
+
+      if (doc.exists) {
+        homeState.riderData.value = doc.data() as Map<String, dynamic>;
+      } else {
+        log('No data found for user');
+        homeState.riderData.value = {};
+      }
+    } catch (e) {
+      log('Error fetching user data: $e');
+      homeState.riderData.value = {};
+    }
+  }
 
   ///Жолоочийн үүсгэсэн ride db-д бичих
   Future<bool> createRide(
-      String destination, String origin, List possibleStops, String day, DateTime time, String selectedCar, int seatsAvailable, double price) async {
+      String destination, String origin, List possibleStops, String day, DateTime time, String selectedCar, int seatsAvailable, int price) async {
     CollectionReference rides = FirebaseFirestore.instance.collection('rides');
     String userId = getUserId();
 
@@ -249,6 +305,53 @@ class HomeController extends GetxController {
     }
   }
 
+  Future<bool> updateRiders(String rideId, String origin, String destination, int bookedSeats) async {
+    if (currentUser == null) {
+      log('No current user found');
+      return false;
+    }
+
+    DocumentReference rideDoc = _firestore.collection('rides').doc(rideId);
+
+    return _firestore.runTransaction((transaction) async {
+      DocumentSnapshot snapshot = await transaction.get(rideDoc);
+
+      if (!snapshot.exists) {
+        log('Ride does not exist');
+        return false;
+      }
+
+      Map<String, dynamic>? rideData = snapshot.data() as Map<String, dynamic>?;
+      if (rideData == null) {
+        log('Ride data is null');
+        return false;
+      }
+
+      Map<String, dynamic> riders = rideData['riders'] ?? {};
+      riders[currentUser!.uid] = {
+        'riderId': currentUser!.uid,
+        'origin': origin,
+        'destination': destination,
+        'bookedSeats': bookedSeats,
+      };
+
+      int currentSeatsAvailable = rideData['seatsAvailable'] ?? 0;
+      int newSeatsAvailable = currentSeatsAvailable - bookedSeats;
+      newSeatsAvailable = newSeatsAvailable < 0 ? 0 : newSeatsAvailable;
+
+      transaction.update(rideDoc, {
+        'riders': riders,
+        'seatsAvailable': newSeatsAvailable,
+      });
+
+      log('Ride updated successfully');
+      return true;
+    }).catchError((e) {
+      log('Error updating ride: $e');
+      return false;
+    });
+  }
+
   ///Ride үүсгэсний дараа бүх хэсгийг цэвэрлэх функц
   void clearFormFields() {
     originController.text = '';
@@ -270,8 +373,45 @@ class HomeController extends GetxController {
     };
   }
 
-  ///Location suggestion авах функц
+  ///Зорчигчийн оруулсан суух, буух цэгийн хоорондох зайг тооцоолох функц
+  Future<void> getDistanceFromBackend(String origin, String destination, int bookedSeats) async {
+    final String apiKey = homeState.apikey;
+    final String encodedOrigin = Uri.encodeComponent(origin);
+    final String encodedDestination = Uri.encodeComponent(destination);
 
+    final String url = 'https://maps.googleapis.com/maps/api/distancematrix/json'
+        '?origins=$encodedOrigin'
+        '&destinations=$encodedDestination'
+        '&units=imperial'
+        '&key=$apiKey';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+
+        if (jsonResponse['status'] == 'OK') {
+          final element = jsonResponse['rows'][0]['elements'][0];
+
+          if (element['status'] == 'OK') {
+            final distanceInMeters = element['distance']['value'];
+            debugPrint('Distance between $origin and $destination: $distanceInMeters meters');
+            homeState.priceToPay.value = (distanceInMeters / 1000).round() * 500 * bookedSeats;
+          } else {
+            throw Exception('Element status is not OK: ${element['status']}');
+          }
+        } else {
+          throw Exception('Response status is not OK: ${jsonResponse['status']}');
+        }
+      } else {
+        throw Exception('Failed to load distance: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      debugPrint('Failed to get distance from backend: $e');
+    }
+  }
+
+  ///Location suggestion авах функц
   Future<List<Map<String, dynamic>>> getLocationSuggestions(String query, String apikey) async {
     if (homeState.searchLocationCache.containsKey(query)) {
       var cachedValue = homeState.searchLocationCache[query] as List<Map<String, dynamic>>;
@@ -282,7 +422,6 @@ class HomeController extends GetxController {
 
     final response = await http.get(url);
     log("came here: ${response.statusCode}");
-    // log('nomio: autocomplete response ${response.body}');
 
     if (response.statusCode == 200) {
       var data = json.decode(response.body);
@@ -290,8 +429,6 @@ class HomeController extends GetxController {
       for (var prediction in data['predictions']) {
         suggestions.add({
           'name': prediction['description'],
-          // 'lat': hit['point']['lat'],
-          // 'lon': hit['point']['lng'],
         });
         log('suggests: $suggestions');
       }
@@ -311,8 +448,6 @@ class HomeController extends GetxController {
       try {
         List<Map<String, dynamic>> fullSuggestions = await getLocationSuggestions(query, homeState.apikey);
         homeState.locSuggestions.assignAll(fullSuggestions);
-
-        log('nomioooo ${homeState.locSuggestions.value}');
       } catch (e) {
         homeState.locSuggestions.clear();
       }
@@ -372,6 +507,7 @@ class HomeController extends GetxController {
 
   Future<void> fetchRouteAndFindBusStops() async {
     try {
+      homeState.isPossibleStopsGenerated.value = false;
       List<List<Map<String, dynamic>>> routePoints = await getRoute(originController.text, destinationController.text);
       log('routePoints: $routePoints');
 
@@ -380,6 +516,7 @@ class HomeController extends GetxController {
       for (var i = 0; i < allRoutesBusStops.length; i++) {
         log('Bus stops for route ${i + 1}: ${allRoutesBusStops[i]}');
       }
+      homeState.isPossibleStopsGenerated.value = true;
     } catch (e) {
       log('Error: $e');
     }
@@ -387,9 +524,7 @@ class HomeController extends GetxController {
 
   ///Зорчигч аяллын дэлгэрэнгүйг харах үед жолоочийн дэлгэрэнгүй мэдээллийг авах функц
   Future<DocumentSnapshot> getDriverDataByDocumentId(String docId) async {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-    DocumentReference docRef = firestore.collection('users').doc(docId);
+    DocumentReference docRef = _firestore.collection('users').doc(docId);
 
     try {
       DocumentSnapshot doc = await docRef.get();
@@ -439,58 +574,93 @@ class HomeController extends GetxController {
     });
   }
 
-  ///Хөдлөх цаг нь өнгөрсөн ба эхлээгүй аяллуудыг устгах
-  // Future<void> deleteOverdueRides() async {
-  //   FirebaseFirestore firestore = FirebaseFirestore.instance;
-  //   DateTime now = DateTime.now();
-  //
-  //   try {
-  //     var snapshot = await firestore.collection('rides').where('startTime', isLessThan: Timestamp.fromDate(now)).get();
-  //
-  //     for (var doc in snapshot.docs) {
-  //       await firestore.collection('rides').doc(doc.id).delete();
-  //     }
-  //   } catch (e) {
-  //     log('Error deleting overdue rides: $e');
-  //   }
-  // }
-
-  ///Хэрэглэгч дансаа цэнэглэх үед үлдэгдэл нэмэгдүүлэх функц
-  Future<bool> updateUserBalance(int price) async {
-    User? user = FirebaseAuth.instance.currentUser;
+  ///Хэрэглэгчийн дансны үлдэгдэл шинэчлэх функц
+  Future<bool> updateUserBalance(int price, String description) async {
     bool success = false;
 
-    if (user != null) {
-      DocumentReference userDoc = FirebaseFirestore.instance.collection('users').doc(user.uid);
+    DocumentReference userDoc = FirebaseFirestore.instance.collection('users').doc(getUserId());
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        DocumentSnapshot snapshot = await transaction.get(userDoc);
 
-      try {
-        await FirebaseFirestore.instance.runTransaction((transaction) async {
-          DocumentSnapshot snapshot = await transaction.get(userDoc);
+        if (snapshot.exists) {
+          Map<String, dynamic>? userData = snapshot.data() as Map<String, dynamic>?;
 
-          if (snapshot.exists) {
-            Map<String, dynamic>? userData = snapshot.data() as Map<String, dynamic>?;
+          if (userData != null && userData.containsKey('wallet') && userData['wallet'] is Map<String, dynamic>) {
+            double currentBalance = (userData['wallet']['balance'] ?? 0).toDouble();
+            double newBalance = currentBalance + price.toDouble();
 
-            if (userData != null && userData.containsKey('wallet') && userData['wallet'] is Map<String, dynamic>) {
-              double currentBalance = (userData['wallet'] as Map<String, dynamic>)['balance'] ?? 0.0;
-              double newBalance = currentBalance + price;
-
-              transaction.update(userDoc, {'wallet.balance': newBalance});
-              homeState.userData['wallet']['balance'] = newBalance;
-
-              await createTransaction(user.uid, 'charge', homeState.price.value);
-              fetchTransactions(user.uid);
+            if (description == 'debit') {
+              newBalance = currentBalance - price.toDouble();
             }
-          }
-        });
 
-        log('User balance updated successfully');
-        success = true;
-      } catch (e) {
-        log('Error updating user balance: $e');
-        success = false;
-      }
+            transaction.update(userDoc, {'wallet.balance': newBalance.toInt()});
+            homeState.userData['wallet']['balance'] = newBalance.toInt();
+
+            await createTransaction(getUserId(), description, price.toInt());
+            fetchTransactions(getUserId());
+          }
+        }
+      });
+
+      log('Хэрэглэгчийн дансны үлдэгдэл амжилттай шинэчлэгдлээ.');
+      success = true;
+    } catch (e) {
+      log('Error updating user balance: $e');
+      success = false;
     }
     return success;
+  }
+
+  ///Payment үүсгэх функц
+  Future<bool> createPayment(String creatorId, String tripId, int amount) async {
+    try {
+      CollectionReference payments = _firestore.collection('payments');
+
+      String paymentId = payments.doc().id;
+      Timestamp timestamp = Timestamp.now();
+
+      Map<String, dynamic> paymentData = {
+        'paymentId': paymentId,
+        'creatorId': creatorId,
+        'tripId': tripId,
+        'amount': amount,
+        'date': timestamp,
+        'status': 'completed',
+      };
+
+      await payments.doc(paymentId).set(paymentData);
+
+      debugPrint('Payment created successfully');
+      return true;
+    } catch (e) {
+      debugPrint('Error creating payment: $e');
+      return false;
+    }
+  }
+
+  ///payment-н датаг paymentData хувьсагчид авах функц
+  Future<void> fetchPayments({String? rideId}) async {
+    try {
+      Query query = _firestore.collection('payments').where('creatorId', isEqualTo: getUserId());
+
+      if (rideId != null) {
+        query = query.where('tripId', isEqualTo: rideId);
+      }
+
+      QuerySnapshot paymentSnapshot = await query.get();
+
+      homeState.paymentData.clear();
+
+      for (var doc in paymentSnapshot.docs) {
+        homeState.paymentData[doc.id] = doc.data();
+        log('payment dataaaa: ${homeState.paymentData[doc.id]}');
+      }
+
+      debugPrint('Payments fetched successfully');
+    } catch (e) {
+      debugPrint('Error fetching payments: $e');
+    }
   }
 
   ///Transaction үүсгэх функц
@@ -535,7 +705,6 @@ class HomeController extends GetxController {
     }
   }
 
-  // Function to extract and format timestamp from Firestore
   String getHourMinuteFromTimestamp(dynamic yourTimestampField) {
     if (yourTimestampField != null && yourTimestampField is Timestamp) {
       DateTime dateTime = yourTimestampField.toDate().toLocal();

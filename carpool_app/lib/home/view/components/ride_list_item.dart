@@ -66,11 +66,10 @@ class RideListItem extends StatelessWidget {
                 ),
                 SizedBox(
                   width: 100,
-                  child: ElevatedButton(
+                  child: TextButton(
                     onPressed: () {
                       onTapTextButton();
                     },
-                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary500),
                     child: Expanded(
                       child: Text(
                         textButton,
@@ -79,7 +78,7 @@ class RideListItem extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: AppColors.primary900,
                         ),
                       ),
                     ),

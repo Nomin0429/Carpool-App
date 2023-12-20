@@ -47,17 +47,20 @@ class OptionCard extends StatelessWidget {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: AppColors.textBlack)),
-                      const SizedBox(height: 8),
-                      Text(
-                        description,
-                        overflow: TextOverflow.visible,
-                        style: const TextStyle(fontSize: 11, color: AppColors.textInfo, fontWeight: FontWeight.w300),
-                      ),
-                    ],
+                  child: Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: AppColors.textBlack)),
+                        const SizedBox(height: 8),
+                        Text(
+                          description,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 4,
+                          style: const TextStyle(fontSize: 11, color: AppColors.textInfo, fontWeight: FontWeight.w300),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

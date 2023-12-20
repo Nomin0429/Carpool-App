@@ -1,58 +1,13 @@
-// import 'dart:developer';
-// import 'package:carpool_app/home/view/home_screen.dart';
-// import 'package:carpool_app/login/view/welcome_screen.dart';
-// import 'package:carpool_app/onBoarding/onBoarding_screen.dart';
-// import 'package:carpool_app/routes.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:firebase_core/firebase_core.dart';
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-//
-// import 'home/logic/home_controller.dart';
-//
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   try {
-//     await Firebase.initializeApp().then((value) => Get.put(()));
-//     runApp(const MyApp());
-//   } catch (e) {
-//     log("Firebase initialization failed: $e");
-//   }
-//
-//   //runApp(const MyApp());
-// }
-//
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return GetMaterialApp(
-//         initialRoute: Routes.onBoarding,
-//         getPages: [
-//           GetPage(name: Routes.onBoarding, page: () => const OnBoardingScreen()),
-//         ],
-//         home: StreamBuilder<User?>(
-//           stream: FirebaseAuth.instance.authStateChanges(),
-//           builder: (context, snapshot) {
-//             if (snapshot.hasData) {
-//               Get.lazyPut(() => HomeController());
-//               return const HomeScreen();
-//             } else {
-//               return const WelcomeScreen();
-//             }
-//           },
-//         ));
-//   }
-// }
+import 'dart:developer';
+
 import 'package:carpool_app/login/view/login_screen.dart';
 import 'package:carpool_app/routes.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'home/logic/home_controller.dart';
 import 'home/view/home_screen.dart';
 import 'onBoarding/onBoarding_screen.dart';
@@ -60,6 +15,7 @@ import 'onBoarding/onBoarding_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
   Get.put(HomeController());
   runApp(const MyApp());
 }
