@@ -55,6 +55,7 @@ dependencies:
   permission_handler: ^11.1.0
   http: ^0.13.6
   multi_select_flutter: ^4.1.3
+  firebase_messaging: ^14.7.9
 
 dev_dependencies:
   flutter_test:

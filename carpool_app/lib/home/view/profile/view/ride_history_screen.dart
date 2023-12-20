@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:carpool_app/home/view/ride_history/ride_history_driver.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -103,6 +105,7 @@ class RideList extends StatelessWidget {
           ride: ride,
           textButton: 'Харах',
           onTapTextButton: () {
+            log('Ride data: $ride');
             Get.to(RideHistoryDriver(
               currentRide: ride,
               riders: [ride['riders']],

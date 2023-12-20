@@ -11,6 +11,7 @@ import '../../login/view/login_screen.dart';
 import '../../signup/component/auto_close_dialog.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class HomeController extends GetxController {
   HomeState homeState = HomeState();
@@ -43,8 +44,54 @@ class HomeController extends GetxController {
     getGreeting();
     loadUserData();
     await getWeatherData(homeState.lat, homeState.lon);
+    await updateFCMToken();
     listenToRides();
     fetchTransactions(getUserId());
+  }
+
+  ///notif ywuulahh permission awah function
+  void requestPermission() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      provisional: false,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      log('User granted permission');
+    } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+      log('User granted provisional permission');
+    } else {
+      log('User declined or has not accepted permission');
+    }
+  }
+
+  Future<void> updateFCMToken() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        NotificationSettings settings = await FirebaseMessaging.instance.requestPermission();
+        if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+          String? fcmToken = await FirebaseMessaging.instance.getToken();
+          if (fcmToken != null) {
+            await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+              'fcmToken': fcmToken,
+            });
+          } else {
+            log("FCM Token is null.");
+          }
+        } else {
+          log("Notification permission denied.");
+        }
+      } else {
+        log("User is not logged in.");
+      }
+    } catch (e) {
+      log('Error updating FCM Token: $e');
+    }
   }
 
   ///Цагаас хамааран мэндчилгээний үг буцаах функц
@@ -280,10 +327,9 @@ class HomeController extends GetxController {
         return false;
       }
 
-      // Modification: Adding riderId in the riders map
       Map<String, dynamic> riders = rideData['riders'] ?? {};
       riders[currentUser!.uid] = {
-        'riderId': currentUser!.uid, // Add riderId
+        'riderId': currentUser!.uid,
         'origin': origin,
         'destination': destination,
         'bookedSeats': bookedSeats,
@@ -543,6 +589,10 @@ class HomeController extends GetxController {
           if (userData != null && userData.containsKey('wallet') && userData['wallet'] is Map<String, dynamic>) {
             double currentBalance = (userData['wallet']['balance'] ?? 0).toDouble();
             double newBalance = currentBalance + price.toDouble();
+
+            if (description == 'debit') {
+              newBalance = currentBalance - price.toDouble();
+            }
 
             transaction.update(userDoc, {'wallet.balance': newBalance.toInt()});
             homeState.userData['wallet']['balance'] = newBalance.toInt();

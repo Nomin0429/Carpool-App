@@ -48,14 +48,19 @@ class DriverDetailsItem extends GetWidget<HomeController> {
                 const SizedBox(
                   height: 10,
                 ),
+                Text(
+                  controller.homeState.driverData['name'],
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                ),
                 Row(
                   children: [
-                    Text(
-                      controller.homeState.driverData['name'],
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                    const Icon(
+                      LineAwesomeIcons.phone,
+                      color: Colors.green,
                     ),
-                    const SizedBox(
-                      width: 5,
+                    Text(
+                      controller.homeState.driverData['phone'],
+                      style: const TextStyle(fontWeight: FontWeight.w500),
                     ),
                     const Icon(
                       LineAwesomeIcons.star_1,
@@ -68,18 +73,6 @@ class DriverDetailsItem extends GetWidget<HomeController> {
                       '${controller.homeState.driverData['avgRating']}',
                       style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
                     ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Icon(
-                      LineAwesomeIcons.phone,
-                      color: Colors.green,
-                    ),
-                    Text(
-                      controller.homeState.driverData['phone'],
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                    )
                   ],
                 )
               ],

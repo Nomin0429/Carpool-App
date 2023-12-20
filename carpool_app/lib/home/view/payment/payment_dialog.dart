@@ -127,8 +127,7 @@ class PaymentDialog extends GetWidget<HomeController> {
                           bookedSeats,
                         );
                         Get.back();
-                        Get.dialog(
-                            const AutoCloseDialog(title: 'Төлбөр төлөлт амжилттай', content: 'Таны төлбөр амжилттай төлөгдөж та аялалд нэгдлээ.'));
+                        Get.dialog(const AutoCloseDialog(title: 'Амжилттай', content: 'Таны төлбөр амжилттай төлөгдөж та аялалд нэгдлээ.'));
                       } else {
                         Get.dialog(
                           ShowAlertDialog(

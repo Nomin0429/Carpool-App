@@ -81,22 +81,21 @@ class RideDetailsItem extends GetWidget<HomeController> {
                   ),
                 ],
               ),
-              // const SizedBox(
-              //   height: 10,
-              // ),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    const Icon(
-                      LineAwesomeIcons.parking,
-                      color: AppColors.primary900,
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    //  width: MediaQuery.of(context).size.width * 0.7,
-                    DropdownButton<String>(
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                children: [
+                  const Icon(
+                    LineAwesomeIcons.parking,
+                    color: AppColors.primary900,
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: DropdownButton<String>(
+                      isExpanded: true,
                       hint: const Text('Боломжит зогсоолууд'),
                       onChanged: (String? selectedStop) {
                         log('Selected stop: $selectedStop');
@@ -104,23 +103,20 @@ class RideDetailsItem extends GetWidget<HomeController> {
                       items: (ride['possibleStops'] as List<dynamic>).map((stop) {
                         return DropdownMenuItem<String>(
                           value: stop.toString(),
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.7,
-                            child: Text(
-                              stop.toString(),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
+                          child: Text(
+                            stop.toString(),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
                         );
                       }).toList(),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              // const SizedBox(
-              //   height: 10,
-              // ),
+              const SizedBox(
+                height: 10,
+              ),
               Row(
                 children: [
                   const Icon(
@@ -135,7 +131,7 @@ class RideDetailsItem extends GetWidget<HomeController> {
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 2,
-                  )
+                  ),
                 ],
               ),
               const SizedBox(
@@ -155,7 +151,7 @@ class RideDetailsItem extends GetWidget<HomeController> {
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 2,
-                  )
+                  ),
                 ],
               ),
             ],

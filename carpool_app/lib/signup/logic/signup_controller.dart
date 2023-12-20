@@ -4,6 +4,7 @@ import 'package:carpool_app/login/view/login_screen.dart';
 import 'package:carpool_app/signup/state/signup_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../../home/view/home_screen.dart';
@@ -46,12 +47,64 @@ class SignUpController extends GetxController {
   }
 
   ///Хэрэглэгч бүртгэх функц
+  // Future<bool> registerEmailAndPassword(String email, String password, String name, String phoneNumber) async {
+  //   try {
+  //     UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
+  //     User? user = userCredential.user;
+  //
+  //     if (user != null) {
+  //       // Давхцаагүй дансны дугаар generate хийх функцийг дуудна.
+  //       String uniqueAccountNumber = await generateUniqueAccountNumber();
+  //
+  //       // Хэтэвчний мэдээллийг тодорхойлох
+  //       Map<String, dynamic> initialWallet = {
+  //         'accountNumber': uniqueAccountNumber,
+  //         'balance': 0,
+  //         'transactions': [],
+  //       };
+  //
+  //       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+  //         'name': name,
+  //         'phone': phoneNumber,
+  //         'email': email,
+  //         'role': 'rider',
+  //         'joinedAt': FieldValue.serverTimestamp(),
+  //         'cars': [],
+  //         'rideHistory': {},
+  //         'avgRating': 0.0,
+  //         'wallet': initialWallet,
+  //       });
+  //
+  //       homeController.loadUserData();
+  //       Get.offAll(() => const HomeScreen());
+  //       return true;
+  //     } else {
+  //       Get.to(() => LoginScreen());
+  //       return false;
+  //     }
+  //   } on FirebaseAuthException catch (e) {
+  //     log('Firebase auth exception: ${e.message}' as num);
+  //     return false;
+  //   } catch (e) {
+  //     log('General exception: $e' as num);
+  //     return false;
+  //   }
+  // }
+  //
+
   Future<bool> registerEmailAndPassword(String email, String password, String name, String phoneNumber) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
       User? user = userCredential.user;
 
       if (user != null) {
+        String? fcmToken = await FirebaseMessaging.instance.getToken();
+
+        if (fcmToken == null) {
+          log("FCM Token is null. Make sure you have proper permissions." as num);
+          return false;
+        }
+
         // Давхцаагүй дансны дугаар generate хийх функцийг дуудна.
         String uniqueAccountNumber = await generateUniqueAccountNumber();
 
@@ -62,6 +115,7 @@ class SignUpController extends GetxController {
           'transactions': [],
         };
 
+        // Save user data to Firestore, including FCM token
         await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
           'name': name,
           'phone': phoneNumber,
@@ -72,6 +126,7 @@ class SignUpController extends GetxController {
           'rideHistory': {},
           'avgRating': 0.0,
           'wallet': initialWallet,
+          'fcmToken': fcmToken, // Save the FCM token here
         });
 
         homeController.loadUserData();
@@ -82,10 +137,10 @@ class SignUpController extends GetxController {
         return false;
       }
     } on FirebaseAuthException catch (e) {
-      log('Firebase auth exception: ${e.message}' as num);
+      print('Firebase auth exception: ${e.message}');
       return false;
     } catch (e) {
-      log('General exception: $e' as num);
+      print('General exception: $e');
       return false;
     }
   }
