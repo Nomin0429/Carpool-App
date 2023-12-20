@@ -58,7 +58,7 @@ class SignUpController extends GetxController {
         // Хэтэвчний мэдээллийг тодорхойлох
         Map<String, dynamic> initialWallet = {
           'accountNumber': uniqueAccountNumber,
-          'balance': 0.0,
+          'balance': 0,
           'transactions': [],
         };
 

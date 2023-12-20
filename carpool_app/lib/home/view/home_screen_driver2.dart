@@ -92,7 +92,7 @@ class HomeScreenDriver2 extends GetWidget<HomeController> {
                         finalDateTime,
                         _homeController.carController.text,
                         int.tryParse(_homeController.seatsAvailableController.text) ?? 1,
-                        _homeController.homeState.pricePerKm.value.toDouble(),
+                        _homeController.homeState.pricePerKm.value,
                       );
                       if (success) {
                         Get.dialog(

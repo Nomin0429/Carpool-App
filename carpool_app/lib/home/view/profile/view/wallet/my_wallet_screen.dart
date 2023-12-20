@@ -107,7 +107,7 @@ class MyWallet extends GetWidget<HomeController> {
                         itemBuilder: (context, index) {
                           final transId = homeController.homeState.transactions.keys.elementAt(index);
                           final transaction = homeController.homeState.transactions[transId];
-                          final currentUserId = homeController.getUserId();
+                          //final currentUserId = homeController.getUserId();
 
                           if (date != homeController.getDateFromTimestamp(transaction['createdAt'])) {
                             isSame = true;

@@ -235,7 +235,7 @@ class AddMoneyToWallet extends GetWidget<HomeController> {
                     const SizedBox(height: 16.0),
                     ElevatedButton(
                       onPressed: () async {
-                        bool success = await controller.updateUserBalance(state.price.value);
+                        bool success = await controller.updateUserBalance(state.price.value, 'charge');
                         log('Success: $success'); // Debug point
 
                         if (success) {

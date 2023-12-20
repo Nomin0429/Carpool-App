@@ -164,7 +164,7 @@ class UpdateProfileScreen extends GetWidget<HomeController> {
                     height: 35,
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text.rich(TextSpan(text: formattedDate, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600), children: const [
                         TextSpan(

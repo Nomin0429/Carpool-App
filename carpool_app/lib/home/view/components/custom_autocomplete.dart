@@ -4,25 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../style/AppColors.dart';
 
-class CustomAutocomplete extends StatelessWidget {
+class CustomAutoComplete extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
   final Icon icon;
   final double height;
   final double width;
-  final Color? borderColor;
-  final double? borderRadius;
   final bool isTextBlack;
   final String? inputFormat;
   final bool isOrigin;
 
-  const CustomAutocomplete({
+  const CustomAutoComplete({
     Key? key,
     required this.controller,
     required this.hintText,
     required this.icon,
-    this.borderColor,
-    this.borderRadius,
     this.isTextBlack = false,
     this.inputFormat,
     required this.height,
@@ -63,9 +59,13 @@ class CustomAutocomplete extends StatelessWidget {
             decoration: InputDecoration(
               hintText: hintText,
               prefixIcon: icon,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(borderRadius ?? 4.0),
-                borderSide: BorderSide(color: borderColor ?? AppColors.primary300),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20.0),
+                borderSide: const BorderSide(color: AppColors.primary300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20.0),
+                borderSide: const BorderSide(color: AppColors.primary700),
               ),
             ),
             style: TextStyle(

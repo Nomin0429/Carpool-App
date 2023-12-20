@@ -42,7 +42,7 @@ class _TimeInputGetterState extends State<TimeInputGetter> {
       child: Container(
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          border: Border.all(color: AppColors.primary550),
+          border: Border.all(color: AppColors.primary300),
           borderRadius: BorderRadius.circular(20.0),
         ),
         child: Row(
@@ -50,12 +50,15 @@ class _TimeInputGetterState extends State<TimeInputGetter> {
           children: <Widget>[
             Text(
               selectedTime.format(context),
-              style: const TextStyle(fontSize: 16.0),
+              style: const TextStyle(fontSize: 16.0, color: Colors.black),
             ),
             const SizedBox(
               width: 5,
             ),
-            const Icon(Icons.access_time),
+            const Icon(
+              Icons.access_time,
+              color: AppColors.primary300,
+            ),
           ],
         ),
       ),
